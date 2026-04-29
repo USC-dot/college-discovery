@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic';
 
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import API from '@/lib/api';
 import Link from 'next/link';
 
-export default function ComparePage() {
+function CompareContent() {
   const searchParams = useSearchParams();
   const ids = searchParams.get('ids')?.split(',') || [];
   const [colleges, setColleges] = useState<any[]>([]);
@@ -15,7 +15,9 @@ export default function ComparePage() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const results = await Promise.all(ids.map(id => API.get(`/colleges/${id}`)));
+        const results = await Promise.all(
+          ids.map(id => API.get(`/colleges/${id}`))
+        );
         setColleges(results.map(r => r.data));
       } catch (err) {
         console.error(err);
@@ -36,8 +38,8 @@ export default function ComparePage() {
     { label: '📍 Location', key: (c: any) => `${c.location}, ${c.state}` },
     { label: '🏛 Type', key: (c: any) => c.type },
     { label: '📅 Established', key: (c: any) => c.established },
-    { label: '💰 Min Fees', key: (c: any) => `₹${(c.fees_min/100000).toFixed(1)}L/yr` },
-    { label: '💰 Max Fees', key: (c: any) => `₹${(c.fees_max/100000).toFixed(1)}L/yr` },
+    { label: '💰 Min Fees', key: (c: any) => `₹${(c.fees_min / 100000).toFixed(1)}L/yr` },
+    { label: '💰 Max Fees', key: (c: any) => `₹${(c.fees_max / 100000).toFixed(1)}L/yr` },
     { label: '⭐ Rating', key: (c: any) => `${c.rating} / 5` },
     { label: '🎯 Placement', key: (c: any) => `${c.placement_percent}%` },
   ];
@@ -45,13 +47,10 @@ export default function ComparePage() {
   return (
     <main className="min-h-screen bg-gray-50 py-10 px-6">
       <div className="max-w-6xl mx-auto">
-
         <Link href="/" className="text-blue-600 text-sm mb-6 block hover:underline">
           ← Back to Colleges
         </Link>
-
         <h1 className="text-3xl font-bold text-gray-800 mb-8">⚖️ College Comparison</h1>
-
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <table className="w-full">
             <thead>
@@ -79,11 +78,9 @@ export default function ComparePage() {
             </tbody>
           </table>
         </div>
-
-        {/* Courses Comparison */}
         <div className="mt-8 bg-white rounded-2xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">📚 Courses Offered</h2>
-          <div className={`grid grid-cols-${colleges.length} gap-6`}>
+          <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${colleges.length}, 1fr)` }}>
             {colleges.map(c => (
               <div key={c.id}>
                 <h3 className="font-bold text-blue-600 mb-3">{c.name}</h3>
@@ -91,7 +88,7 @@ export default function ComparePage() {
                   {c.courses?.map((course: any) => (
                     <div key={course.id} className="bg-gray-50 rounded-lg p-3">
                       <p className="text-sm font-medium text-gray-800">{course.name}</p>
-                      <p className="text-xs text-gray-500">₹{(course.fees/100000).toFixed(1)}L/yr</p>
+                      <p className="text-xs text-gray-500">₹{(course.fees / 100000).toFixed(1)}L/yr</p>
                     </div>
                   ))}
                 </div>
@@ -99,8 +96,15 @@ export default function ComparePage() {
             ))}
           </div>
         </div>
-
       </div>
     </main>
+  );
+}
+
+export default function ComparePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <CompareContent />
+    </Suspense>
   );
 }
