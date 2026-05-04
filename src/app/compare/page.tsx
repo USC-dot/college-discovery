@@ -50,25 +50,25 @@ function CompareContent() {
           ← Back to Colleges
         </Link>
         <h1 className="text-3xl font-bold text-gray-800 mb-8">⚖️ College Comparison</h1>
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-lg overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-blue-700 text-white">
-                <th className="p-4 text-left w-40">Feature</th>
-                {colleges.map(c => (
-                  <th key={c.id} className="p-4 text-center">
-                    <div className="font-bold">{c.name}</div>
-                    <div className="text-blue-200 text-xs font-normal">{c.location}</div>
-                  </th>
-                ))}
-              </tr>
+  <th className="p-3 text-left w-28 text-sm">Feature</th>
+  {colleges.map(c => (
+    <th key={c.id} className="p-3 text-center">
+      <div className="font-bold text-sm">{c.name}</div>
+      <div className="text-blue-200 text-xs font-normal">{c.location}</div>
+    </th>
+  ))}
+</tr>
             </thead>
             <tbody>
               {rows.map((row, i) => (
                 <tr key={i} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                  <td className="p-4 font-semibold text-gray-600 text-sm">{row.label}</td>
-                  {colleges.map(c => (
-                    <td key={c.id} className="p-4 text-center text-gray-800 font-medium">
+                  <td className="p-3 font-semibold text-gray-600 text-xs">{row.label}</td>
+{colleges.map(c => (
+  <td key={c.id} className="p-3 text-center text-gray-800 font-medium text-sm">
                       {row.key(c)}
                     </td>
                   ))}

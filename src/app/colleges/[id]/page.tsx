@@ -5,36 +5,45 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import QandA from '@/components/QandA';
 import { useAuth } from '@/context/AuthContext';
+
 export default function CollegeDetail() {
   const { user, token } = useAuth();
-const [isSaved, setIsSaved] = useState(false);
-const router = useRouter();
-const toggleSave = async () => {
-  if (!user) {
-    router.push('/login');
-    return;
-  }
-  try {
-    const res = await API.post(`/auth/saved/${id}`, {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setIsSaved(res.data.saved);
-  } catch (err) {
-    console.error(err);
-  }
-};
   const { id } = useParams();
+  const router = useRouter();
+
   const [college, setCollege] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [questions, setQuestions] = useState<any[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showQA, setShowQA] = useState(false);
+
+  const toggleSave = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    try {
+      const res = await API.post(`/auth/saved/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setIsSaved(res.data.saved);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     const fetchCollege = async () => {
       try {
         const res = await API.get(`/colleges/${id}`);
         setCollege(res.data);
-        const qRes = await API.get(`/colleges/${id}/questions`);
-        setQuestions(qRes.data);
+        try {
+          const qRes = await API.get(`/colleges/${id}/questions`);
+          setQuestions(qRes.data);
+        } catch {
+          setQuestions([]);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -83,11 +92,11 @@ const toggleSave = async () => {
               <button
                 onClick={toggleSave}
                 className={`mt-3 px-6 py-2 rounded-xl font-bold text-sm transition ${
-                isSaved
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'bg-white text-blue-700 hover:bg-blue-50'
-                 }`}>
-                 {isSaved ? '❤️ Saved!' : '🤍 Save College'}
+                  isSaved
+                    ? 'bg-red-500 text-white hover:bg-red-600'
+                    : 'bg-white text-blue-700 hover:bg-blue-50'
+                }`}>
+                {isSaved ? '❤️ Saved!' : '🤍 Save College'}
               </button>
             </div>
           </div>
@@ -120,20 +129,20 @@ const toggleSave = async () => {
 
       {/* Tabs */}
       <div className="max-w-5xl mx-auto px-6 mt-6">
-        <div className="flex gap-2 border-b border-gray-200 mb-6">
-          {['overview', 'courses', 'reviews', 'qa'].map(tab => (
-  <button
-    key={tab}
-    onClick={() => setActiveTab(tab)}
-    className={`px-6 py-3 text-sm font-medium capitalize transition ${
-      activeTab === tab
-        ? 'border-b-2 border-blue-600 text-blue-600'
-        : 'text-gray-500 hover:text-gray-700'
-    }`}
-  >
-    {tab === 'qa' ? 'Q&A' : tab}
-  </button>
-))}
+        <div className="flex gap-2 border-b border-gray-200 mb-6 overflow-x-auto">
+          {['overview', 'courses', 'reviews'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-3 text-sm font-medium capitalize transition whitespace-nowrap ${
+                activeTab === tab
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
 
         {/* Overview Tab */}
@@ -142,25 +151,25 @@ const toggleSave = async () => {
             <h2 className="text-xl font-bold text-gray-800 mb-3">About</h2>
             <p className="text-gray-600 leading-relaxed">{college.overview}</p>
             <div className="grid grid-cols-2 gap-4 mt-6">
-  <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-    <p className="text-sm text-blue-500 font-medium">Location</p>
-    <p className="font-bold text-gray-800 mt-1">{college.location}, {college.state}</p>
-  </div>
-  <div className="bg-green-50 border border-green-100 rounded-lg p-4">
-    <p className="text-sm text-green-500 font-medium">Type</p>
-    <p className="font-bold text-gray-800 mt-1">{college.type}</p>
-  </div>
-  <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
-    <p className="text-sm text-purple-500 font-medium">Fees Range</p>
-    <p className="font-bold text-gray-800 mt-1">
-      ₹{(college.fees_min/100000).toFixed(1)}L - ₹{(college.fees_max/100000).toFixed(1)}L
-    </p>
-  </div>
-  <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
-    <p className="text-sm text-yellow-600 font-medium">Established</p>
-    <p className="font-bold text-gray-800 mt-1">{college.established}</p>
-  </div>
-</div>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <p className="text-sm text-blue-500 font-medium">Location</p>
+                <p className="font-bold text-gray-800 mt-1">{college.location}, {college.state}</p>
+              </div>
+              <div className="bg-green-50 border border-green-100 rounded-lg p-4">
+                <p className="text-sm text-green-500 font-medium">Type</p>
+                <p className="font-bold text-gray-800 mt-1">{college.type}</p>
+              </div>
+              <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                <p className="text-sm text-purple-500 font-medium">Fees Range</p>
+                <p className="font-bold text-gray-800 mt-1">
+                  ₹{(college.fees_min / 100000).toFixed(1)}L - ₹{(college.fees_max / 100000).toFixed(1)}L
+                </p>
+              </div>
+              <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
+                <p className="text-sm text-yellow-600 font-medium">Established</p>
+                <p className="font-bold text-gray-800 mt-1">{college.established}</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -202,13 +211,38 @@ const toggleSave = async () => {
             </div>
           </div>
         )}
-        {activeTab === 'qa' && (
-  <div className="bg-white rounded-xl p-6 shadow-sm">
-    <h2 className="text-xl font-bold text-gray-800 mb-4">💬 Questions & Answers</h2>
-    <QandA collegeId={Number(id)} questions={questions} />
-  </div>
-)}
       </div>
+
+      {/* Floating Q&A Button */}
+      <button
+        onClick={() => setShowQA(true)}
+        className="fixed bottom-6 right-6 bg-blue-600 text-white px-5 py-3 rounded-full shadow-2xl font-bold text-sm hover:bg-blue-700 transition z-40">
+        💬 Q&A
+      </button>
+
+      {/* Q&A Sliding Drawer */}
+      {showQA && (
+        <div className="fixed inset-0 z-50 flex justify-end pointer-events-none">
+          {/* Backdrop */}
+          <div
+              className="absolute inset-0 bg-black/30"
+              onClick={() => setShowQA(false)}
+              />
+          {/* Drawer */}
+          <div className="relative bg-white w-full max-w-lg h-full overflow-y-auto shadow-2xl p-6 animate-slide-in pointer-events-auto">
+            <div className="flex justify-between items-center mb-6 sticky top-0 bg-white pb-4 border-b border-gray-100">
+  <h2 className="text-xl font-bold text-gray-800">💬 Questions & Answers</h2>
+  <button
+    onClick={() => setShowQA(false)}
+    className="bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 w-9 h-9 rounded-full flex items-center justify-center font-bold text-lg transition">
+    ✕
+  </button>
+</div>
+            <QandA collegeId={Number(id)} questions={questions} />
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }
